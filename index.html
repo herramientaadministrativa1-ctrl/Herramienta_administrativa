@@ -317,6 +317,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <h3 class="font-bold text-base text-white"><i class="fa-solid fa-key text-indigo-400"></i> Cambiar Contraseña</h3>
 <p class="text-xs text-slate-400">Usuario: <span id="change-pass-username" class="font-bold text-slate-200"></span></p>
 <input type="hidden" id="change-pass-userid">
+<input type="hidden" id="change-pass-email">
 <input type="password" id="change-pass-new" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100" placeholder="Nueva contraseña (mín. 8 caracteres)">
 <div class="flex gap-2.5 pt-2">
 <button onclick="closeChangePasswordModal()" class="flex-1 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs cursor-pointer">Cancelar</button>
@@ -970,7 +971,7 @@ function renderMasterUsers(){
   const c=document.getElementById('master-users-list');if(!c)return;
   const vis=state.users.filter(u=>u.role!=='master');
   if(vis.length===0){c.innerHTML='<p class="text-xs text-slate-500 text-center py-2">Sin usuarios.</p>';return;}
-  c.innerHTML=vis.map(u=>'<div class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60 flex justify-between items-center"><div><p class="font-bold text-slate-200">'+u.username+' <span class="text-[10px] text-indigo-400 uppercase">('+u.role+')</span></p><p class="text-[9px] text-slate-500">'+u.email+'</p></div><div class="flex gap-1.5"><button onclick="openChangePasswordModal(\''+u.id+'\', \''+u.username+'\')" class="bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-xl text-[11px] cursor-pointer"><i class="fa-solid fa-key"></i></button><button onclick="deleteUser(\''+u.id+'\')" class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-xl text-[11px] cursor-pointer"><i class="fa-solid fa-trash"></i></button></div></div>').join('');
+  c.innerHTML=vis.map(u=>'<div class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60 flex justify-between items-center"><div><p class="font-bold text-slate-200">'+u.username+' <span class="text-[10px] text-indigo-400 uppercase">('+u.role+')</span></p><p class="text-[9px] text-slate-500">'+u.email+'</p></div><div class="flex gap-1.5"><button onclick="openChangePasswordModal(\''+u.id+'\', \''+u.username+'\', \''+u.email+'\')" class="bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-xl text-[11px] cursor-pointer"><i class="fa-solid fa-key"></i></button><button onclick="deleteUser(\''+u.id+'\')" class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-xl text-[11px] cursor-pointer"><i class="fa-solid fa-trash"></i></button></div></div>').join('');
 }
 function openUserModal(){document.getElementById('modal-user').classList.remove('hidden');}
 function closeUserModal(){document.getElementById('modal-user').classList.add('hidden');}
@@ -993,9 +994,10 @@ async function saveUser(){
 }
 async function deleteUser(id){if(confirm('¿Eliminar usuario?'))await pb.collection('users').delete(id);}
 
-function openChangePasswordModal(id, username) {
+function openChangePasswordModal(id, username, email) {
   document.getElementById('change-pass-userid').value = id;
   document.getElementById('change-pass-username').innerText = username;
+  document.getElementById('change-pass-email').value = email;
   document.getElementById('change-pass-new').value = '';
   document.getElementById('modal-change-password').classList.remove('hidden');
 }
@@ -1004,12 +1006,13 @@ function closeChangePasswordModal() {
 }
 async function changeUserPassword() {
   const id = document.getElementById('change-pass-userid').value;
+  const email = document.getElementById('change-pass-email').value;
   const pass = document.getElementById('change-pass-new').value.trim();
   if (pass.length < 8) { alert('La contraseña debe tener al menos 8 caracteres.'); return; }
   const btn = document.getElementById('btn-change-pass');
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
   try {
-    await pb.collection('users').update(id, { password: pass, passwordConfirm: pass });
+    await pb.collection('users').update(id, { email: email, password: pass, passwordConfirm: pass });
     alert('✅ Contraseña actualizada correctamente.');
     closeChangePasswordModal();
   } catch (e) {
