@@ -97,6 +97,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <div><h2 class="font-bold text-sm" id="cajero-name-display">Caja POS</h2>
 <p class="text-xs text-slate-400">Tasa BCV: <span id="pos-rate-display" class="font-semibold text-emerald-400">36.00</span> Bs/$</p></div>
 <div class="flex gap-1.5">
+<button onclick="openFiaosModal()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2.5 py-2 rounded-xl text-xs font-medium cursor-pointer"><i class="fa-solid fa-book-open"></i> Fiaos</button>
 <button onclick="openOrdersModal()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-2 rounded-xl text-xs font-medium cursor-pointer relative"><i class="fa-solid fa-motorcycle"></i> Pedidos<span id="orders-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center"></span></button>
 <button onclick="openCashierHistoryModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-2 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-clock-rotate-left"></i></button>
 <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-2 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-power-off"></i></button>
@@ -497,8 +498,25 @@ function initPocketBaseRealtime(){
 }
 
 function updateUIConfig(){
-  const btl=document.getElementById('biz-title-login');if(btl)btl.innerText=state.businessName;
-  const brl=document.getElementById('biz-rif-login');if(brl)brl.innerText="RIF: "+state.businessRif;
+  const isLoggedIn = pb.authStore.isValid;
+  const btl=document.getElementById('biz-title-login');
+  const brl=document.getElementById('biz-rif-login');
+  const logo=document.getElementById('biz-logo-container');
+
+  if(isLoggedIn){
+    if(btl)btl.innerText=state.businessName;
+    if(brl)brl.innerText="RIF: "+state.businessRif;
+    if(logo){
+      if(state.businessLogo){logo.innerHTML='<img src="'+state.businessLogo+'" class="w-full h-full object-cover" alt="Logo">';
+        let f=document.getElementById('dynamic-favicon')||document.createElement('link');
+        f.id='dynamic-favicon';f.rel='icon';f.href=state.businessLogo;document.head.appendChild(f);
+      }else{logo.innerHTML='<i class="fa-solid fa-store"></i>';}
+    }
+  }else{
+    if(btl)btl.innerText="POS Comercial";
+    if(brl)brl.innerText="RIF: J-00000000-0";
+    if(logo)logo.innerHTML='<i class="fa-solid fa-store"></i>';
+  }
   const prd=document.getElementById('pos-rate-display');if(prd)prd.innerText=state.exchangeRate.toFixed(2);
   const sri=document.getElementById('supervisor-rate-input');if(sri)sri.value=state.exchangeRate;
   const mri=document.getElementById('master-rate-input');if(mri)mri.value=state.exchangeRate;
@@ -507,13 +525,6 @@ function updateUIConfig(){
   const mbr=document.getElementById('master-biz-rif');if(mbr)mbr.value=state.businessRif;
   const mbd=document.getElementById('master-biz-dir');if(mbd)mbd.value=state.businessDir;
   document.title=state.businessName+" - POS";
-  const logo=document.getElementById('biz-logo-container');
-  if(logo){
-    if(state.businessLogo){logo.innerHTML='<img src="'+state.businessLogo+'" class="w-full h-full object-cover" alt="Logo">';
-      let f=document.getElementById('dynamic-favicon')||document.createElement('link');
-      f.id='dynamic-favicon';f.rel='icon';f.href=state.businessLogo;document.head.appendChild(f);
-    }else{logo.innerHTML='<i class="fa-solid fa-store"></i>';}
-  }
 }
 
 function previewBusinessLogo(event){
@@ -598,6 +609,7 @@ function logout(){
   document.getElementById('login-pass').value='';
   ['view-cajero','view-supervisor','view-master'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   document.getElementById('view-login').classList.remove('hidden');
+  updateUIConfig();
   selectRole('cajero');
 }
 
@@ -639,7 +651,6 @@ async function setOrderStatus(newStatus){
         if(newStatus==='pagado'&&state.currentRole!=='cajero'){
             const o=state.orders.find(x=>x.id===state.currentOrderId);
             if(o&&!o.paidRegistered){
-                // Atribuir la venta al cajero que aceptó el pedido, no al supervisor
                 const cajeroAtendio = o.acceptedBy || state.currentUser || 'sistema';
                 await pb.collection('sales').create({cashier:cajeroAtendio,items:JSON.stringify(o.items||[]),totalUsd:o.totalUsd,totalBs:o.totalBs,method:o.method||'efectivo',extra:JSON.stringify(o.extra||{}),date:formatLocalDateTime(),timestamp:new Date().toISOString()});
                 update.paidRegistered=true;
