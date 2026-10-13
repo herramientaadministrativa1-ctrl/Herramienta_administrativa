@@ -22,7 +22,6 @@ let pbAdminToken = null;
 
 async function getPBAdminToken() {
     if (pbAdminToken) return pbAdminToken;
-    // Intento 1: PocketBase 0.23+ (superusers)
     try {
         const r = await axios.post(`${POCKETBASE_URL}/api/collections/_superusers/auth-with-password`, {
             identity: PB_ADMIN_EMAIL,
@@ -31,7 +30,6 @@ async function getPBAdminToken() {
         pbAdminToken = r.data.token;
         return pbAdminToken;
     } catch (e) {
-        // Intento 2: PocketBase 0.21 y anteriores (admins)
         try {
             const r = await axios.post(`${POCKETBASE_URL}/api/admins/auth-with-password`, {
                 identity: PB_ADMIN_EMAIL,
@@ -51,14 +49,12 @@ app.get('/update-rate', async (req, res) => {
         let newRate = null;
         let source = '';
 
-        // 1. Pydolarve (principal)
         try {
             const r = await axios.get('https://pydolarve.org/api/v1/dollar?page=bcv', { timeout: 10000 });
             newRate = parseFloat(r.data.price);
             if (newRate > 0) source = 'pydolarve';
         } catch (e) { console.error('pydolarve falló:', e.message); }
 
-        // 2. DolarAPI (respaldo 1)
         if (!newRate || isNaN(newRate) || newRate <= 0) {
             try {
                 const r = await axios.get('https://ve.dolarapi.com/v1/dolares/oficial', { timeout: 10000 });
@@ -67,7 +63,6 @@ app.get('/update-rate', async (req, res) => {
             } catch (e) { console.error('dolarapi falló:', e.message); }
         }
 
-        // 3. bcv-api.vercel.app (respaldo 2)
         if (!newRate || isNaN(newRate) || newRate <= 0) {
             try {
                 const r = await axios.get('https://bcv-api.vercel.app/v1/dollar', { timeout: 10000 });
@@ -80,7 +75,6 @@ app.get('/update-rate', async (req, res) => {
             return res.status(502).json({ success: false, error: 'No se pudo obtener la tasa de ninguna fuente.' });
         }
 
-        // Guardar en PocketBase
         const token = await getPBAdminToken();
         const list = await axios.get(
             `${POCKETBASE_URL}/api/collections/settings/records?sort=-created&perPage=1`,
@@ -97,12 +91,7 @@ app.get('/update-rate', async (req, res) => {
         } else {
             await axios.post(
                 `${POCKETBASE_URL}/api/collections/settings/records`,
-                {
-                    exchangeRate: newRate,
-                    lowStockThreshold: 5,
-                    businessName: 'POS Comercial',
-                    termsAccepted: false
-                },
+                { exchangeRate: newRate, lowStockThreshold: 5, businessName: 'POS Comercial', termsAccepted: false },
                 { headers: { Authorization: token } }
             );
         }
@@ -117,41 +106,63 @@ app.get('/update-rate', async (req, res) => {
 
 // ==================== WEBHOOK: RECIBIR PEDIDOS DE WHATSAPP ====================
 app.post('/webhook', async (req, res) => {
-    const data = req.body;
-    console.log('Mensaje recibido:', JSON.stringify(data).substring(0, 300));
+    try {
+        const payload = req.body;
+        console.log('Webhook recibido:', JSON.stringify(payload).substring(0, 500));
 
-    if (data.evento === 'mensajes.upsert' && data.datos && data.datos.key.fromMe === false) {
-        const msg = data.datos;
-        const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
-        const remitente = msg.key.remoteJid;
-        const nombre = msg.pushName || 'Cliente WhatsApp';
-        const telefono = remitente.split('@')[0];
-
-        try {
-            const token = await getPBAdminToken();
-            await axios.post(`${POCKETBASE_URL}/api/collections/orders/records`, {
-                orderNumber: 'WA-' + Date.now().toString().slice(-6),
-                customerName: nombre,
-                customerPhone: telefono,
-                items: JSON.stringify([{ name: texto, quantity: 1, price: 0 }]),
-                totalUsd: 0,
-                totalBs: 0,
-                method: 'efectivo',
-                status: 'pendiente',
-                notes: 'Pedido recibido por WhatsApp',
-                date: new Date().toLocaleString('es-VE', { timeZone: 'America/Caracas' }),
-                timestamp: new Date().toISOString()
-            }, { headers: { Authorization: token } });
-            console.log('✅ Pedido WhatsApp creado para:', nombre);
-        } catch (error) {
-            console.error('❌ Error al crear pedido:', error.message);
+        // Evolution API v2 usa: event, instance, data
+        if (payload.event !== 'messages.upsert') {
+            return res.status(200).send('OK');
         }
-    }
 
-    res.status(200).send('OK');
+        const data = payload.data;
+        if (!data || !data.key) return res.status(200).send('OK');
+
+        // Ignorar mensajes propios
+        if (data.key.fromMe === true) return res.status(200).send('OK');
+
+        // Ignorar grupos
+        if (data.key.remoteJid && data.key.remoteJid.includes('@g.us')) {
+            return res.status(200).send('OK');
+        }
+
+        // Extraer texto
+        const texto = data.message?.conversation 
+            || data.message?.extendedTextMessage?.text 
+            || data.message?.buttonsResponseMessage?.selectedDisplayText
+            || data.message?.listResponseMessage?.title
+            || '';
+        
+        if (!texto.trim()) return res.status(200).send('OK');
+
+        const remitente = data.key.remoteJid || '';
+        const telefono = remitente.split('@')[0];
+        const nombre = data.pushName || 'Cliente WhatsApp';
+
+        const token = await getPBAdminToken();
+        await axios.post(`${POCKETBASE_URL}/api/collections/orders/records`, {
+            orderNumber: 'WA-' + Date.now().toString().slice(-6),
+            customerName: nombre,
+            customerPhone: telefono,
+            items: JSON.stringify([{ name: texto, quantity: 1, price: 0 }]),
+            totalUsd: 0,
+            totalBs: 0,
+            method: 'efectivo',
+            status: 'pendiente',
+            notes: 'Pedido recibido por WhatsApp',
+            date: new Date().toLocaleString('es-VE', { timeZone: 'America/Caracas' }),
+            timestamp: new Date().toISOString()
+        }, { headers: { Authorization: token } });
+
+        console.log('✅ Pedido WhatsApp creado para:', nombre, '| Tel:', telefono);
+        res.status(200).send('OK');
+    } catch (error) {
+        console.error('❌ Error en webhook:', error.message);
+        res.status(200).send('OK');
+    }
 });
 
-// ==================== NOTIFICACIÓN DE DESPACHO (FRONTEND) ====================
+// ==================== NOTIFICACIÓN DE DESPACHO ====================
 app.post('/notify-despachado', async (req, res) => {
     console.log('Pedido despachado:', req.body.orderId);
     res.status(200).send('OK');
