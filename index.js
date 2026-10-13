@@ -3,7 +3,18 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-const POCKETBASE_URL = process.env.POCKETBASE_URL || 'https://pocketbase-production-1467.up.railway.app';
+// ==================== CONFIGURACIÓN CORS ====================
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
+const POCKETBASE_URL = process.env.POCKETBASE_URL || 'https://pocketbase-production-c412.up.railway.app';
 const PB_ADMIN_EMAIL = process.env.PB_ADMIN_EMAIL || '';
 const PB_ADMIN_PASS = process.env.PB_ADMIN_PASS || '';
 
@@ -142,7 +153,6 @@ app.post('/webhook', async (req, res) => {
 
 // ==================== NOTIFICACIÓN DE DESPACHO (FRONTEND) ====================
 app.post('/notify-despachado', async (req, res) => {
-    // Aquí puedes integrar el envío de mensaje de WhatsApp al cliente
     console.log('Pedido despachado:', req.body.orderId);
     res.status(200).send('OK');
 });
