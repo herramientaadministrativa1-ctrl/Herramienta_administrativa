@@ -20,7 +20,14 @@
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8fafc}
 .view-transition{animation:fadeIn .3s cubic-bezier(.16,1,.3,1) forwards}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@media print{body *{visibility:hidden}#printable-ticket,#printable-ticket *{visibility:visible}#printable-ticket{position:absolute;left:0;top:0;width:100%}}
+@media print{
+  @page{size:58mm auto;margin:0}
+  body *{visibility:hidden !important}
+  #printable-ticket,#printable-ticket *{visibility:visible !important}
+  #printable-ticket{position:absolute !important;left:0 !important;top:0 !important;width:54mm !important;padding:2mm !important;margin:0 !important;font-family:'Courier New',monospace !important;font-size:9pt !important;line-height:1.2 !important;background:#fff !important;color:#000 !important}
+  #printable-ticket *{background:transparent !important;color:#000 !important;border-color:#000 !important;box-shadow:none !important}
+  #modal-ticket > div > div:last-child,#modal-ticket > div > button{display:none !important}
+}
 </style>
 </head>
 <body class="bg-slate-900 min-h-screen text-slate-100 flex flex-col justify-between items-center">
@@ -58,7 +65,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 </div>
 </div>
 
-<div id="app" class="w-full max-w-md mx-auto bg-slate-900 min-h-screen shadow-2xl flex flex-col relative overflow-hidden border-x border-slate-800">
+<div id="app" class="w-full max-w-md lg:max-w-6xl xl:max-w-7xl mx-auto bg-slate-900 min-h-screen shadow-2xl flex flex-col relative overflow-hidden border-x border-slate-800">
 
 <!-- LOGIN -->
 <div id="view-login" class="flex flex-col flex-1 p-6 justify-center view-transition">
@@ -102,17 +109,17 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <button onclick="openCashierHistoryModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-2 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-clock-rotate-left"></i></button>
 <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-2 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-power-off"></i></button>
 </div></div>
-<div class="flex-1 p-4 overflow-y-auto space-y-4 pb-10">
-<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl">
+<div class="flex-1 p-4 lg:p-6 overflow-y-auto space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 pb-10">
+<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl lg:col-span-2">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5"><i class="fa-solid fa-box text-indigo-400"></i> Productos / Artículos</h3>
-<div id="pos-products-list" class="grid grid-cols-2 gap-2.5"></div></div>
-<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl">
+<div id="pos-products-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2.5"></div></div>
+<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl lg:col-span-2">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5"><i class="fa-solid fa-cart-shopping text-indigo-400"></i> Detalle de Venta</h3>
 <div id="pos-cart-list" class="divide-y divide-slate-700/50 max-h-44 overflow-y-auto mb-3 text-xs"><p class="text-slate-500 text-center py-6">No hay productos seleccionados</p></div>
 <div class="border-t border-slate-700 pt-3 space-y-1.5 text-sm font-semibold">
 <div class="flex justify-between text-slate-300"><span>Total USD:</span><span id="pos-total-usd" class="text-indigo-400 font-bold">$0.00</span></div>
 <div class="flex justify-between text-slate-400"><span>Total Bs:</span><span id="pos-total-bs" class="text-slate-200">Bs. 0.00</span></div></div></div>
-<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-3">
+<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-3 lg:row-span-2">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-credit-card text-indigo-400"></i> Método de Pago</h3>
 <div class="grid grid-cols-3 gap-2">
 <button type="button" onclick="setPaymentMethod('efectivo')" id="pay-btn-efectivo" class="pay-method-btn p-2.5 text-center rounded-xl border text-xs font-semibold bg-indigo-600/20 border-indigo-500 text-indigo-300 cursor-pointer">Efectivo</button>
@@ -144,7 +151,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <input type="text" id="fiao-phone" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100" placeholder="Teléfono">
 <div class="bg-amber-950/30 border border-amber-900/50 p-2.5 rounded-xl text-xs text-amber-300">Fecha: <span id="fiao-date-display" class="font-bold"></span></div></div>
 </div></div>
-<div class="pt-1 pb-4">
+<div class="pt-1 pb-4 lg:col-span-3">
 <button onclick="finalizeSale()" id="btn-finalize-sale" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 rounded-2xl font-bold shadow-lg cursor-pointer"><i class="fa-solid fa-check-circle"></i> Finalizar Venta</button>
 </div></div></div>
 
@@ -153,7 +160,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <div class="bg-slate-800/95 border-b border-slate-700/60 text-white p-4 flex justify-between items-center">
 <h2 class="font-bold text-sm">Panel Supervisor</h2>
 <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-power-off"></i> Salir</button></div>
-<div class="flex-1 p-4 overflow-y-auto space-y-4 pb-8">
+<div class="flex-1 p-4 lg:p-6 overflow-y-auto space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 pb-8">
 <div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl">
 <div class="flex justify-between items-center mb-2.5">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-motorcycle text-emerald-400"></i> Pedidos Delivery</h3>
@@ -170,14 +177,14 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-2.5">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-users-gear text-indigo-400"></i> Bloquear / Desbloquear Cajeros</h3>
 <div id="supervisor-cashiers-list" class="space-y-2"></div></div>
-<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-2.5">
+<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-2.5 lg:col-span-2">
 <div class="flex justify-between items-center">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-file-invoice-dollar text-indigo-400"></i> Registros de Caja</h3>
 <div class="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700">
 <button onclick="setSupervisorSalesFilter('today')" id="sup-filter-today" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 text-white cursor-pointer">Hoy</button>
 <button onclick="setSupervisorSalesFilter('3days')" id="sup-filter-3days" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer">3 Días</button></div></div>
 <div id="supervisor-sales-list" class="space-y-2.5 max-h-64 overflow-y-auto text-xs"></div></div>
-<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-2.5">
+<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-2.5 lg:col-span-2">
 <div class="flex justify-between items-center">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-boxes-stacked text-indigo-400"></i> Inventario</h3>
 <button onclick="openProductModal()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer"><i class="fa-solid fa-plus"></i> Nuevo</button></div>
@@ -189,7 +196,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <div class="bg-slate-800/95 border-b border-slate-700/60 text-white p-4 flex justify-between items-center">
 <h2 class="font-bold text-sm">Panel Master (Gerente)</h2>
 <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-power-off"></i> Salir</button></div>
-<div class="flex-1 p-4 overflow-y-auto space-y-4 pb-8">
+<div class="flex-1 p-4 lg:p-6 overflow-y-auto space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 pb-8">
 <div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-3">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-store text-indigo-400"></i> Datos del Negocio</h3>
 <div class="space-y-2.5 text-xs">
@@ -242,7 +249,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-calendar-days text-indigo-400"></i> Historial (15 Días)</h3>
 <button onclick="printMaster15DayReport()" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-print"></i> Imprimir 15D</button></div>
 <div id="master-15day-report" class="space-y-2 max-h-64 overflow-y-auto text-xs"></div></div>
-<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-2.5">
+<div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl space-y-2.5 lg:col-span-2">
 <div class="flex justify-between items-center">
 <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-right-to-bracket text-indigo-400"></i> Registro de Ingresos</h3>
 <button onclick="clearLogsHistory()" class="bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-1.5 rounded-xl text-xs cursor-pointer"><i class="fa-solid fa-trash"></i> Borrar</button></div>
@@ -311,18 +318,6 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <button onclick="closeUserModal()" class="flex-1 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs cursor-pointer">Cancelar</button>
 <button onclick="saveUser()" id="btn-save-user" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-xs cursor-pointer">Crear</button></div></div></div>
 
-<!-- MODAL CAMBIAR CONTRASEÑA -->
-<div id="modal-change-password" class="hidden fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4">
-<div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4">
-<h3 class="font-bold text-base text-white"><i class="fa-solid fa-key text-indigo-400"></i> Cambiar Contraseña</h3>
-<p class="text-xs text-slate-400">Usuario: <span id="change-pass-username" class="font-bold text-slate-200"></span></p>
-<input type="hidden" id="change-pass-userid">
-<input type="hidden" id="change-pass-email">
-<input type="password" id="change-pass-new" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100" placeholder="Nueva contraseña (mín. 8 caracteres)">
-<div class="flex gap-2.5 pt-2">
-<button onclick="closeChangePasswordModal()" class="flex-1 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs cursor-pointer">Cancelar</button>
-<button onclick="changeUserPassword()" id="btn-change-pass" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-xs cursor-pointer">Guardar</button></div></div></div>
-
 <div id="modal-cashier-history" class="hidden fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4">
 <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] flex flex-col">
 <div class="flex justify-between items-center">
@@ -380,7 +375,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:#f8
 <div class="flex-1 overflow-y-auto space-y-2 text-xs" id="reconciliation-results"></div></div></div>
 
 <div id="modal-ticket" class="hidden fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4">
-<div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4">
+<div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm lg:max-w-md space-y-4">
 <div id="printable-ticket" class="bg-white text-slate-900 p-4 rounded-2xl text-xs space-y-2 font-mono">
 <div class="text-center">
 <div id="ticket-logo-container" class="flex justify-center mb-1"></div>
@@ -407,14 +402,22 @@ const pb = new PocketBase(window.APP_CONFIG.POCKETBASE_URL);
 pb.autoCancellation(false);
 
 async function fetchBCVRate(showAlert){
-  let newRate=null;
-  try{const r=await fetch('https://pydolarve.org/api/v1/dollar?page=bcv',{cache:'no-store'});if(r.ok){const d=await r.json();newRate=parseFloat(d.price);}}catch(e){}
-  if(!newRate||isNaN(newRate)||newRate<=0){try{const r=await fetch('https://ve.dolarapi.com/v1/dolares/oficial',{cache:'no-store'});if(r.ok){const d=await r.json();newRate=parseFloat(d.promedio);}}catch(e){}}
-  if(!newRate||isNaN(newRate)||newRate<=0){try{const r=await fetch('https://bcv-api.vercel.app/v1/dollar',{cache:'no-store'});if(r.ok){const d=await r.json();newRate=parseFloat((d.bcv&&d.bcv.value)||d.value||d.rate);}}catch(e){}}
-  if(newRate&&!isNaN(newRate)&&newRate>0){
-    if(state.exchangeRate!==newRate){state.exchangeRate=newRate;if(state.configId){try{await pb.collection('settings').update(state.configId,{exchangeRate:newRate});}catch(e){}}updateUIConfig();if(showAlert)alert('Tasa BCV actualizada: '+newRate+' Bs/$');}
-    else{if(showAlert)alert('Tasa actualizada: '+newRate+' Bs/$');}
-  }else{if(showAlert)alert('No se pudo conectar con las APIs del BCV. Actualice manualmente.');}
+    try{
+        const backendUrl=(window.APP_CONFIG.BACKEND_URL||'')+'/update-rate';
+        const r=await fetch(backendUrl,{cache:'no-store'});
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        const d=await r.json();
+        if(d.success&&d.rate){
+            state.exchangeRate=d.rate;
+            updateUIConfig();
+            if(showAlert)alert('Tasa BCV actualizada: '+d.rate+' Bs/$ (fuente: '+(d.source||'backend')+')');
+        }else{
+            if(showAlert)alert('No se pudo obtener la tasa: '+(d.error||'desconocido'));
+        }
+    }catch(e){
+        console.error('Error al obtener la tasa:',e);
+        if(showAlert)alert('Error de conexión al actualizar la tasa.');
+    }
 }
 
 function formatLocalDateTime(d){const date=d?new Date(d):new Date();if(isNaN(date.getTime()))return '';try{return date.toLocaleString('es-VE',{timeZone:'America/Caracas',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});}catch(e){return date.toLocaleString();}}
@@ -510,11 +513,10 @@ function initPocketBaseRealtime(){
 }
 
 function updateUIConfig(){
-  const isLoggedIn = pb.authStore.isValid;
+  const isLoggedIn=pb.authStore.isValid;
   const btl=document.getElementById('biz-title-login');
   const brl=document.getElementById('biz-rif-login');
   const logo=document.getElementById('biz-logo-container');
-
   if(isLoggedIn){
     if(btl)btl.innerText=state.businessName;
     if(brl)brl.innerText="RIF: "+state.businessRif;
@@ -663,13 +665,12 @@ async function setOrderStatus(newStatus){
         if(newStatus==='pagado'&&state.currentRole!=='cajero'){
             const o=state.orders.find(x=>x.id===state.currentOrderId);
             if(o&&!o.paidRegistered){
-                const cajeroAtendio = o.acceptedBy || state.currentUser || 'sistema';
+                const cajeroAtendio=o.acceptedBy||state.currentUser||'sistema';
                 await pb.collection('sales').create({cashier:cajeroAtendio,items:JSON.stringify(o.items||[]),totalUsd:o.totalUsd,totalBs:o.totalBs,method:o.method||'efectivo',extra:JSON.stringify(o.extra||{}),date:formatLocalDateTime(),timestamp:new Date().toISOString()});
                 update.paidRegistered=true;
             }
         }
         await pb.collection('orders').update(state.currentOrderId,update);
-
         if(newStatus==='aceptado'&&state.currentRole==='cajero'){
             const o=state.orders.find(x=>x.id===state.currentOrderId);
             if(o){
@@ -682,14 +683,13 @@ async function setOrderStatus(newStatus){
                 alert('✅ Pedido cargado en la caja. Finaliza la venta para facturarlo.');
             }
         }
-
         if(newStatus==='despachado'){
             try{
-                await fetch('https://puente-whatsapp-pos.onrender.com/notify-despachado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:state.currentOrderId})});
+                const backendUrl=(window.APP_CONFIG.BACKEND_URL||'')+'/notify-despachado';
+                await fetch(backendUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:state.currentOrderId})});
                 console.log('✅ Notificación de despacho enviada');
             }catch(e){console.warn('No se pudo notificar despacho:',e.message);}
         }
-
         closeOrderDetailModal();
         await loadInitialDataFromPocketBase();
     }catch(err){alert('Error al actualizar el pedido: '+err.message);}
@@ -824,12 +824,10 @@ async function finalizeSale(){
     for(let item of state.cart){const cp=await pb.collection('products').getOne(item.id);if(cp.stock<item.quantity)throw new Error('Stock insuficiente de '+cp.name);await pb.collection('products').update(item.id,{stock:cp.stock-item.quantity});}
     if(state.paymentMethod==='fiao'){await pb.collection('fiaos').create({name:extra.name,phone:extra.phone,amount:totalUsd,date:formatLocalDateTime(),timestamp:new Date().toISOString()});}
     await pb.collection('sales').create({cashier:state.currentUser,items:JSON.stringify(state.cart.map(i=>({id:i.id,name:i.name,price:i.price,quantity:i.quantity}))),totalUsd,totalBs,method:state.paymentMethod,extra:JSON.stringify(extra),date:formatLocalDateTime(),timestamp:new Date().toISOString()});
-
     if(state.deliveryOrderId){
       try{await pb.collection('orders').update(state.deliveryOrderId,{status:'pagado',paidRegistered:true});}catch(e){console.warn(e);}
       state.deliveryOrderId=null;
     }
-
     state.lastTicketData={cashier:state.currentUser,items:[...state.cart],totalUsd,totalBs,method:state.paymentMethod,extra,date:formatLocalDateTime()};
     showTicketModal(state.lastTicketData);
     state.cart=[];renderCart();renderPOSProducts();
@@ -971,7 +969,7 @@ function renderMasterUsers(){
   const c=document.getElementById('master-users-list');if(!c)return;
   const vis=state.users.filter(u=>u.role!=='master');
   if(vis.length===0){c.innerHTML='<p class="text-xs text-slate-500 text-center py-2">Sin usuarios.</p>';return;}
-  c.innerHTML=vis.map(u=>'<div class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60 flex justify-between items-center"><div><p class="font-bold text-slate-200">'+u.username+' <span class="text-[10px] text-indigo-400 uppercase">('+u.role+')</span></p><p class="text-[9px] text-slate-500">'+u.email+'</p></div><div class="flex gap-1.5"><button onclick="openChangePasswordModal(\''+u.id+'\', \''+u.username+'\', \''+u.email+'\')" class="bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-xl text-[11px] cursor-pointer"><i class="fa-solid fa-key"></i></button><button onclick="deleteUser(\''+u.id+'\')" class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-xl text-[11px] cursor-pointer"><i class="fa-solid fa-trash"></i></button></div></div>').join('');
+  c.innerHTML=vis.map(u=>'<div class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60 flex justify-between items-center"><div><p class="font-bold text-slate-200">'+u.username+' <span class="text-[10px] text-indigo-400 uppercase">('+u.role+')</span></p><p class="text-[9px] text-slate-500">'+u.email+'</p></div><button onclick="deleteUser(\''+u.id+'\')" class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-xl text-[11px] cursor-pointer"><i class="fa-solid fa-trash"></i></button></div>').join('');
 }
 function openUserModal(){document.getElementById('modal-user').classList.remove('hidden');}
 function closeUserModal(){document.getElementById('modal-user').classList.add('hidden');}
@@ -993,36 +991,6 @@ async function saveUser(){
   finally{btn.disabled=false;btn.innerHTML='Crear';}
 }
 async function deleteUser(id){if(confirm('¿Eliminar usuario?'))await pb.collection('users').delete(id);}
-
-function openChangePasswordModal(id, username, email) {
-  document.getElementById('change-pass-userid').value = id;
-  document.getElementById('change-pass-username').innerText = username;
-  document.getElementById('change-pass-email').value = email;
-  document.getElementById('change-pass-new').value = '';
-  document.getElementById('modal-change-password').classList.remove('hidden');
-}
-function closeChangePasswordModal() {
-  document.getElementById('modal-change-password').classList.add('hidden');
-}
-async function changeUserPassword() {
-  const id = document.getElementById('change-pass-userid').value;
-  const email = document.getElementById('change-pass-email').value;
-  const pass = document.getElementById('change-pass-new').value.trim();
-  if (pass.length < 8) { alert('La contraseña debe tener al menos 8 caracteres.'); return; }
-  const btn = document.getElementById('btn-change-pass');
-  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-  try {
-    await pb.collection('users').update(id, { email: email, password: pass, passwordConfirm: pass });
-    alert('✅ Contraseña actualizada correctamente.');
-    closeChangePasswordModal();
-  } catch (e) {
-    console.error(e);
-    alert('❌ Error al cambiar la contraseña: ' + e.message);
-  } finally {
-    btn.disabled = false; btn.innerHTML = 'Guardar';
-  }
-}
-
 function renderMasterSalesReport(){const c=document.getElementById('master-sales-report');if(c)c.innerHTML=getGroupedSalesHtml(filterSalesByPeriod(getSortedSales(),'today'));}
 function renderMaster15DayReport(){const c=document.getElementById('master-15day-report');if(c)c.innerHTML=getGroupedSalesHtml(filterSalesByPeriod(getSortedSales(),'15days'));}
 function printMasterReport(){printSpecificReport('Reporte Diario de Ventas',filterSalesByPeriod(getSortedSales(),'today'));}
